@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseMessage, money, describeBalance, isBust, twiml, bustMessage, historyReply, paidMessage, becameBust } from "../src/logic.js";
+import { parseMessage, money, describeBalance, isBust, twiml, bustMessage, historyReply, paidMessage, becameBust, consentKeyword, consentPrompt, DECLINED } from "../src/logic.js";
 import { computeSignature, isValidSignature } from "../src/twilio.js";
 
 const people = { a: { name: "Daniel", phone: "+15550000001" }, b: { name: "Sam", phone: "+15550000002" } };
@@ -61,4 +61,19 @@ test("signature matches Twilio's documented example", async () => {
   assert.equal(sig, "0/KCTR6DLpKmkAf8muzZqo1nDgQ=");
   assert.ok(await isValidSignature(token, url, params, sig));
   assert.ok(!(await isValidSignature(token, url, { ...params, Digits: "9" }, sig)));
+});
+
+test("consent keywords", () => {
+  assert.equal(consentKeyword(" Yes ", undefined), "yes");
+  assert.equal(consentKeyword("START", undefined), "yes");
+  assert.equal(consentKeyword("no", undefined), "no");
+  assert.equal(consentKeyword("Stop", undefined), "stop");
+  assert.equal(consentKeyword("info", undefined), "help");
+  assert.equal(consentKeyword("anything", "STOP"), "stop");
+  assert.equal(consentKeyword("42 yes", undefined), null);
+  assert.equal(consentKeyword("paid", undefined), null);
+});
+
+test("consent texts fit one SMS segment", () => {
+  for (const s of [consentPrompt("Christopher"), DECLINED]) assert.ok(s.length <= 160 && /^[\x20-\x7e]*$/.test(s), s);
 });

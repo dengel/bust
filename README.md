@@ -11,6 +11,7 @@ A shared SMS tally for two people. Text the number with what you paid, and the b
 | `UNDO` | Void your own most recent entry (since the last reset) |
 | `HISTORY` | Last 10 entries since the last reset |
 | `PAID` | Only once busted: record that the balance was paid and reset to $0 |
+| `YES` / `NO` | Opt in or decline. Until a person replies YES, any text gets the welcome prompt and nothing is logged for them or sent to them |
 
 - Person A's entries push the balance toward "B owes A". Person B's push the other way.
 - When the balance crosses the threshold (from a new entry or an UNDO), both people get the BUST text. They get it again if the debtor flips. Entries are still accepted while busted, and `PAID` settles whatever the balance is at that point. Either person can send `PAID`. It can't be undone.
@@ -55,7 +56,7 @@ Twilio's 10DLC campaign review needs public SMS terms and a privacy policy. They
 - SMS terms and opt-in: https://dengel.github.io/bust/
 - Privacy policy: https://dengel.github.io/bust/privacy.html
 
-Keep the sample messages there in sync with `src/logic.js` and with the samples in the Twilio campaign form. Set the Messaging Service's HELP reply to name bust and the contact address, since reviewers text HELP to test it.
+Keep the sample messages there in sync with `src/logic.js` and with the samples in the Twilio campaign form. The registered brand is **Buster**. Twilio answers YES/START, STOP and HELP itself (and still forwards them to the Worker, which records consent and sends no reply of its own). In the Messaging Service's Opt-Out Management, set those three replies to the exact texts quoted on the terms page, since reviewers text them to test.
 
 ## Cost (Twilio US list prices, checked 2026-10-02)
 

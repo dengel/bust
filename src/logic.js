@@ -14,6 +14,30 @@ const COMMANDS = {
 
 export const USAGE = "Text an amount you paid, e.g. \"42.50 dinner\". Commands: BALANCE, UNDO, HISTORY, PAID.";
 
+// Twilio's default keyword lists. Twilio sends its own replies to these (configured under the
+// Messaging Service's Opt-Out Management) and passes OptOutType = STOP | START | HELP to the webhook.
+const OPT_KEYWORDS = {
+  STOP: ["stop", "stopall", "unsubscribe", "cancel", "end", "quit", "optout", "revoke"],
+  START: ["start", "yes", "unstop"],
+  HELP: ["help", "info"],
+};
+
+// Returns "yes" | "no" | "stop" | "help" | null. NO isn't a Twilio keyword, so the bot replies to it itself.
+export function consentKeyword(body, optOutType) {
+  const text = (body || "").trim().toLowerCase();
+  const type = optOutType || Object.keys(OPT_KEYWORDS).find((k) => OPT_KEYWORDS[k].includes(text));
+  if (type === "START") return "yes";
+  if (type === "STOP") return "stop";
+  if (type === "HELP") return "help";
+  return text === "no" ? "no" : null;
+}
+
+export function consentPrompt(otherName) {
+  return `Buster: Reply YES to get shared expense tally texts with ${otherName}. Msg frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out.`;
+}
+
+export const DECLINED = "Buster: OK, you won't get Buster texts. Reply YES anytime to join.";
+
 export function parseMessage(body) {
   const text = (body || "").trim();
   const cmd = COMMANDS[text.toLowerCase()];

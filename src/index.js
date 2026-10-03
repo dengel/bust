@@ -1,6 +1,6 @@
 import {
   parseMessage, isBust, becameBust, logged, entryReply, bustMessage, stillBustSuffix, paidMessage,
-  undoReply, historyReply, describeBalance, twiml, USAGE,
+  undoReply, historyReply, describeBalance, twiml, USAGE, consentKeyword, consentPrompt, DECLINED,
 } from "./logic.js";
 import { isValidSignature, sendSms } from "./twilio.js";
 
@@ -27,8 +27,18 @@ export default {
       .bind(params.MessageSid).run();
     if (fresh.meta.changes === 0) return xml(null); // Twilio redelivery.
 
+    // Consent gate. Twilio itself replies to YES/START, STOP and HELP, so those get no TwiML reply here.
+    const keyword = consentKeyword(params.Body, params.OptOutType);
+    if (keyword === "help") return xml(null);
+    if (keyword === "yes" || keyword === "stop" || keyword === "no") {
+      await setConsent(env.DB, sender.phone, keyword === "yes" ? "yes" : "no");
+      return xml(keyword === "no" ? DECLINED : null);
+    }
+    if ((await getConsent(env.DB, sender.phone)) !== "yes") return xml(consentPrompt(other.name));
+
     const threshold = Number(env.BUST_THRESHOLD_DOLLARS || 100) * 100;
-    const notifyOther = (text) => ctx.waitUntil(sendSms(env, other.phone, text));
+    const otherOptedIn = (await getConsent(env.DB, other.phone)) === "yes";
+    const notifyOther = (text) => otherOptedIn && ctx.waitUntil(sendSms(env, other.phone, text));
     const msg = parseMessage(params.Body);
 
     switch (msg.type) {
@@ -91,6 +101,18 @@ export default {
     }
   },
 };
+
+async function getConsent(db, phone) {
+  const row = await db.prepare("SELECT status FROM consent WHERE phone = ?").bind(phone).first();
+  return row?.status ?? null;
+}
+
+async function setConsent(db, phone, status) {
+  await db.prepare(
+    `INSERT INTO consent (phone, status) VALUES (?, ?)
+     ON CONFLICT (phone) DO UPDATE SET status = excluded.status, updated_at = datetime('now')`,
+  ).bind(phone, status).run();
+}
 
 async function getBalance(db) {
   const row = await db.prepare("SELECT COALESCE(SUM(amount_cents), 0) AS b FROM entries WHERE voided = 0").first();
