@@ -1,0 +1,16 @@
+:root { --bg: #fff; --fg: #1a1a1a; --muted: #555; --line: #ddd; --code: #f4f4f4; --link: #0b5cad; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #141414; --fg: #e8e8e8; --muted: #aaa; --line: #333; --code: #1f1f1f; --link: #6cb4ff; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.6 system-ui, -apple-system, sans-serif; }
+main { max-width: 680px; margin: 0 auto; padding: 32px 16px 64px; }
+h1 { font-size: 1.8rem; margin: 0 0 4px; }
+h2 { font-size: 1.15rem; margin: 32px 0 8px; }
+p, li { margin: 0 0 10px; }
+.sub { color: var(--muted); margin-bottom: 24px; }
+nav { margin-bottom: 24px; font-size: 0.95rem; }
+nav a { margin-right: 16px; }
+a { color: var(--link); }
+blockquote { margin: 0 0 10px; padding: 10px 14px; background: var(--code); border-left: 3px solid var(--line); font-family: ui-monospace, monospace; font-size: 0.9rem; overflow-wrap: anywhere; }
+footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.9rem; }

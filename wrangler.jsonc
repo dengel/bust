@@ -1,0 +1,13 @@
+{
+  "name": "bust",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-01",
+  "d1_databases": [
+    // Replace database_id with the one printed by `npx wrangler d1 create bust`.
+    { "binding": "DB", "database_name": "bust", "database_id": "REPLACE_ME" }
+  ],
+  "vars": {
+    "BUST_THRESHOLD_DOLLARS": "100"
+    // PERSON_A_NAME/PHONE, PERSON_B_NAME/PHONE, TWILIO_* are set as secrets (see README).
+  }
+}
