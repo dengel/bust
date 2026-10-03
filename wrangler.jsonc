@@ -4,7 +4,7 @@
   "compatibility_date": "2026-09-01",
   "d1_databases": [
     // Replace database_id with the one printed by `npx wrangler d1 create bust`.
-    { "binding": "DB", "database_name": "bust", "database_id": "REPLACE_ME" }
+    { "binding": "DB", "database_name": "bust", "database_id": "5c9d1bb3-88a9-41fc-b52c-5a0cb86c3f00" }
   ],
   "vars": {
     "BUST_THRESHOLD_DOLLARS": "100"
