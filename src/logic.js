@@ -38,6 +38,15 @@ export function consentPrompt(otherName) {
 
 export const DECLINED = "Buster: OK, you won't get Buster texts. Reply YES anytime to join.";
 
+// Keyword replies, word for word as registered with the 10DLC campaign and on docs/index.html.
+// Sent by the Worker only when Twilio didn't handle the keyword itself (no OptOutType on the webhook).
+export const KEYWORD_REPLIES = {
+  yes: "Buster: You're opted in. Text an amount you paid, e.g. 42.50 dinner. Msg freq varies. Msg&data rates may apply. Reply HELP for help, STOP to opt out.",
+  stop: "Buster: You're unsubscribed and will get no more messages. Reply START to resubscribe.",
+  help: "Buster: Shared expense tally. Email multisite@gmail.com for help. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out.",
+  no: DECLINED,
+};
+
 export function parseMessage(body) {
   const text = (body || "").trim();
   const cmd = COMMANDS[text.toLowerCase()];

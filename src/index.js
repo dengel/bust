@@ -1,6 +1,6 @@
 import {
   parseMessage, isBust, becameBust, logged, entryReply, bustMessage, stillBustSuffix, paidMessage,
-  undoReply, historyReply, describeBalance, twiml, USAGE, consentKeyword, consentPrompt, DECLINED,
+  undoReply, historyReply, describeBalance, twiml, USAGE, consentKeyword, consentPrompt, KEYWORD_REPLIES,
 } from "./logic.js";
 import { isValidSignature, sendSms } from "./twilio.js";
 
@@ -27,12 +27,13 @@ export default {
       .bind(params.MessageSid).run();
     if (fresh.meta.changes === 0) return xml(null); // Twilio redelivery.
 
-    // Consent gate. Twilio itself replies to YES/START, STOP and HELP, so those get no TwiML reply here.
+    // Consent gate. When Twilio handles a keyword (Advanced Opt-Out) it sets OptOutType and sends its own
+    // reply, so we stay silent; otherwise we send the registered reply ourselves.
     const keyword = consentKeyword(params.Body, params.OptOutType);
-    if (keyword === "help") return xml(null);
-    if (keyword === "yes" || keyword === "stop" || keyword === "no") {
-      await setConsent(env.DB, sender.phone, keyword === "yes" ? "yes" : "no");
-      return xml(keyword === "no" ? DECLINED : null);
+    if (keyword) {
+      console.log(`keyword=${keyword} OptOutType=${params.OptOutType ?? "(none)"}`);
+      if (keyword !== "help") await setConsent(env.DB, sender.phone, keyword === "yes" ? "yes" : "no");
+      return xml(params.OptOutType ? null : KEYWORD_REPLIES[keyword]);
     }
     if ((await getConsent(env.DB, sender.phone)) !== "yes") return xml(consentPrompt(other.name));
 

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseMessage, money, describeBalance, isBust, twiml, bustMessage, historyReply, paidMessage, becameBust, consentKeyword, consentPrompt, DECLINED } from "../src/logic.js";
+import { parseMessage, money, describeBalance, isBust, twiml, bustMessage, historyReply, paidMessage, becameBust, consentKeyword, consentPrompt, DECLINED, KEYWORD_REPLIES } from "../src/logic.js";
 import { computeSignature, isValidSignature } from "../src/twilio.js";
 
 const people = { a: { name: "Daniel", phone: "+15550000001" }, b: { name: "Sam", phone: "+15550000002" } };
@@ -75,5 +75,5 @@ test("consent keywords", () => {
 });
 
 test("consent texts fit one SMS segment", () => {
-  for (const s of [consentPrompt("Christopher"), DECLINED]) assert.ok(s.length <= 160 && /^[\x20-\x7e]*$/.test(s), s);
+  for (const s of [consentPrompt("Christopher"), ...Object.values(KEYWORD_REPLIES)]) assert.ok(s.length <= 160 && /^[\x20-\x7e]*$/.test(s), s);
 });
