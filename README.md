@@ -16,6 +16,7 @@ A shared SMS tally for two people. Text the number with what you paid, and the b
 | `STOP` / `HELP` | Opt out / get help (answered by Twilio, see [Opt-out replies](#4-opt-out-replies-advanced-opt-out)) |
 
 - Person A's entries push the balance toward "B owes A". Person B's push the other way.
+- Every entry and UNDO is also texted to the other person, e.g. `Alex logged $42.50 (dinner). Sam owes Alex $42.50.`
 - When the balance crosses the threshold (from a new entry or an UNDO), both people get the BUST text. They get it again if the debtor flips. Entries are still accepted while busted, and `PAID` settles whatever the balance is at that point. Either person can send `PAID`. It can't be undone.
 - Only messages from the two configured numbers with a valid Twilio signature are processed. Anything else is ignored.
 
@@ -94,7 +95,7 @@ With `npx wrangler tail` running, from each person's phone:
 1. `START`: the opted-in reply (the log shows `keyword=yes OptOutType=START`).
 2. `10 test`, then `UNDO`: logged, then undone and even.
 3. `BALANCE`, `HISTORY`, `HELP`.
-4. Optional: `100 test` then `PAID` to check the BUST alert and reset. The other person only gets the BUST and settled texts once they've opted in.
+4. Optional: `100 test` then `PAID` to check the BUST alert and reset. The other person only gets notices (entries, UNDO, BUST, settled) once they've opted in.
 
 ## Cost (Twilio US list prices, checked 2026-10-02)
 
@@ -102,4 +103,4 @@ With `npx wrangler tail` running, from each person's phone:
 - SMS: $0.0083 per segment in or out, plus carrier fees on outbound of about $0.0035–0.005
 - Cloudflare Workers + D1: free tier
 
-About 60 entries a month (one inbound plus one reply each) comes to roughly **$2.50–3/month**. Replies use no emoji (emoji switch the message to an encoding that allows only 70 characters per segment). Most replies are one segment; ones with long notes, BUST alerts, and HISTORY can be 2–3.
+About 60 entries a month (one inbound, one reply, and one notice to the other person each) comes to roughly **$3–4/month**. Replies use no emoji (emoji switch the message to an encoding that allows only 70 characters per segment). Most replies are one segment; ones with long notes, BUST alerts, and HISTORY can be 2–3.

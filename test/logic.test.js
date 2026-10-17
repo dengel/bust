@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseMessage, money, describeBalance, isBust, twiml, bustMessage, historyReply, paidMessage, becameBust, consentKeyword, consentPrompt, DECLINED, KEYWORD_REPLIES } from "../src/logic.js";
+import { parseMessage, money, describeBalance, isBust, twiml, bustMessage, historyReply, paidMessage, becameBust, loggedBy, undoneBy, consentKeyword, consentPrompt, DECLINED, KEYWORD_REPLIES } from "../src/logic.js";
 import { computeSignature, isValidSignature } from "../src/twilio.js";
 
 const people = { a: { name: "Daniel", phone: "+15550000001" }, b: { name: "Sam", phone: "+15550000002" } };
@@ -40,6 +40,13 @@ test("bust alerts fire on crossing or debtor flip only", () => {
   assert.ok(!becameBust(10500, 11000, 10000));
   assert.ok(becameBust(10500, -10500, 10000));
   assert.ok(!becameBust(10500, 9000, 10000));
+});
+
+test("other participant's notices name who acted", () => {
+  assert.equal(loggedBy("Daniel", { cents: 4250, note: "dinner" }), "Daniel logged $42.50 (dinner).");
+  assert.equal(loggedBy("Sam", { cents: 900, note: "" }), "Sam logged $9.00.");
+  assert.equal(undoneBy("Sam", { amount_cents: -900, note: null }), "Sam undid $9.00.");
+  assert.equal(undoneBy("Daniel", { amount_cents: 4250, note: "dinner" }), "Daniel undid $42.50 (dinner).");
 });
 
 test("history lists who paid what", () => {

@@ -1,5 +1,5 @@
 import {
-  parseMessage, isBust, becameBust, logged, entryReply, bustMessage, stillBustSuffix, paidMessage,
+  parseMessage, isBust, becameBust, logged, loggedBy, undoneBy, entryReply, bustMessage, stillBustSuffix, paidMessage,
   undoReply, historyReply, describeBalance, twiml, USAGE, consentKeyword, consentPrompt, KEYWORD_REPLIES,
 } from "./logic.js";
 import { isValidSignature, sendSms } from "./twilio.js";
@@ -50,10 +50,12 @@ export default {
         const balance = await getBalance(env.DB);
         if (becameBust(balance - signed, balance, threshold)) {
           const bust = bustMessage(balance, people);
-          notifyOther(bust);
+          notifyOther(`${loggedBy(sender.name, msg)} ${bust}`);
           return xml(`${logged(msg)} ${bust}`);
         }
-        return xml(entryReply(msg, balance, people) + (isBust(balance, threshold) ? stillBustSuffix() : ""));
+        const still = isBust(balance, threshold) ? stillBustSuffix() : "";
+        notifyOther(`${loggedBy(sender.name, msg)} ${describeBalance(balance, people)}${still}`);
+        return xml(entryReply(msg, balance, people) + still);
       }
 
       case "undo": {
@@ -66,10 +68,12 @@ export default {
         const balance = await getBalance(env.DB);
         if (becameBust(balance + last.amount_cents, balance, threshold)) {
           const bust = bustMessage(balance, people);
-          notifyOther(bust);
+          notifyOther(`${undoneBy(sender.name, last)} ${bust}`);
           return xml(`${undoReply(last)} ${bust}`);
         }
-        return xml(`${undoReply(last)} ${describeBalance(balance, people)}` + (isBust(balance, threshold) ? stillBustSuffix() : ""));
+        const still = isBust(balance, threshold) ? stillBustSuffix() : "";
+        notifyOther(`${undoneBy(sender.name, last)} ${describeBalance(balance, people)}${still}`);
+        return xml(`${undoReply(last)} ${describeBalance(balance, people)}${still}`);
       }
 
       case "paid": {

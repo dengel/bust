@@ -85,8 +85,17 @@ export function becameBust(before, after, thresholdCents) {
   return isBust(after, thresholdCents) && (!isBust(before, thresholdCents) || Math.sign(before) !== Math.sign(after));
 }
 
+function amountWithNote(cents, note) {
+  return note ? `${money(cents)} (${note})` : money(cents);
+}
+
 export function logged({ cents, note }) {
-  return `Logged ${note ? `${money(cents)} (${note})` : money(cents)}.`;
+  return `Logged ${amountWithNote(cents, note)}.`;
+}
+
+// What the other participant sees when someone logs an entry.
+export function loggedBy(name, { cents, note }) {
+  return `${name} logged ${amountWithNote(cents, note)}.`;
 }
 
 export function entryReply(entry, balance, people) {
@@ -107,7 +116,11 @@ export function paidMessage(balance, people) {
 }
 
 export function undoReply(entry) {
-  return `Undid ${entry.note ? `${money(entry.amount_cents)} (${entry.note})` : money(entry.amount_cents)}.`;
+  return `Undid ${amountWithNote(entry.amount_cents, entry.note)}.`;
+}
+
+export function undoneBy(name, entry) {
+  return `${name} undid ${amountWithNote(entry.amount_cents, entry.note)}.`;
 }
 
 export function historyReply(rows, people) {
